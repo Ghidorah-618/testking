@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laplace — Product &amp; Startup Specification v3</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0e0e0e;--surface:#161616;--surface2:#1e1e1e;--surface3:#262626;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);--text:#e8e8e6;--muted:#666;--secondary:#999;--accent:#7c9ff5;--accent-bg:rgba(124,159,245,0.08);--accent-border:rgba(124,159,245,0.2);--green:#4ade80;--green-bg:rgba(74,222,128,0.07);--green-border:rgba(74,222,128,0.2);--red:#f87171;--red-bg:rgba(248,113,113,0.07);--red-border:rgba(248,113,113,0.2);--yellow:#fbbf24;--yellow-bg:rgba(251,191,36,0.07);--yellow-border:rgba(251,191,36,0.2);--font:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;--mono:'SFMono-Regular','Cascadia Code','Fira Code',Consolas,monospace;--r:8px}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh}
+#bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;opacity:0.12;pointer-events:none}
+.wrap{position:relative;z-index:1;max-width:920px;margin:0 auto;padding:3rem 2rem 6rem}
+.toc{position:sticky;top:0;z-index:10;background:rgba(14,14,14,0.92);backdrop-filter:blur(12px);border-bottom:0.5px solid var(--border2);padding:0.6rem 0;margin-bottom:2rem;overflow-x:auto;white-space:nowrap}
+.toc a{font-size:11px;font-family:var(--mono);color:var(--muted);text-decoration:none;margin-right:20px;letter-spacing:0.3px;transition:color 0.15s}.toc a:hover{color:var(--accent)}
+.hero{margin-bottom:3rem}.hero-name{font-size:48px;font-weight:400;letter-spacing:-2px;color:var(--text);line-height:1}.hero-ver{font-size:12px;font-family:var(--mono);color:var(--muted);margin-top:4px;margin-bottom:1rem}.hero-thesis{font-size:16px;color:var(--secondary);line-height:1.6;max-width:640px;border-left:2px solid var(--accent);padding-left:1rem}.badges{display:flex;flex-wrap:wrap;gap:5px;margin-top:1.5rem}.badge{font-size:10px;font-family:var(--mono);padding:3px 8px;border-radius:3px;border:0.5px solid var(--border2);color:var(--muted);background:var(--surface)}.badge.g{background:var(--green-bg);color:var(--green);border-color:var(--green-border)}.badge.b{background:var(--accent-bg);color:var(--accent);border-color:var(--accent-border)}.badge.y{background:var(--yellow-bg);color:var(--yellow);border-color:var(--yellow-border)}.badge.r{background:var(--red-bg);color:var(--red);border-color:var(--red-border)}
+h2{font-size:13px;font-weight:500;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:3rem 0 1rem;padding-bottom:0.5rem;border-bottom:0.5px solid var(--border2)}h3{font-size:16px;font-weight:500;color:var(--text);margin:1.5rem 0 0.5rem}h4{font-size:13px;font-weight:500;color:var(--secondary);margin:1rem 0 0.4rem}p{font-size:14px;line-height:1.75;color:var(--secondary);margin-bottom:0.75rem}strong{color:var(--text);font-weight:500}
+code{font-family:var(--mono);font-size:11.5px;background:var(--surface2);padding:1px 5px;border-radius:3px;border:0.5px solid var(--border);color:var(--text)}pre{background:var(--surface2);border:0.5px solid var(--border2);border-radius:var(--r);padding:1.1rem;overflow-x:auto;margin:0.75rem 0 1rem}pre code{background:none;border:none;padding:0;font-size:11.5px;line-height:1.65;color:var(--text)}
+.note{background:var(--surface);border-left:2.5px solid var(--accent);padding:0.75rem 1rem;border-radius:0 var(--r) var(--r) 0;margin:1rem 0}.note p{margin:0;font-size:13px}.note.warn{border-color:var(--yellow)}.note.ok{border-color:var(--green)}.note.danger{border-color:var(--red)}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:0.75rem 0 1.25rem}th{font-size:10px;font-weight:500;text-align:left;padding:6px 10px;color:var(--muted);border-bottom:0.5px solid var(--border2);text-transform:uppercase;letter-spacing:0.5px}td{padding:7px 10px;border-bottom:0.5px solid var(--border);color:var(--secondary);vertical-align:top;line-height:1.5}td:first-child{color:var(--text)}tr:last-child td{border-bottom:none}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0.75rem 0}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0.75rem 0}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0.75rem 0}@media(max-width:640px){.grid2,.grid3,.grid4{grid-template-columns:1fr}}
+.card{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:1rem}.card .clabel{font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);margin-bottom:4px;font-family:var(--mono)}.card .cval{font-size:14px;font-weight:500;color:var(--text);margin-bottom:3px}.card .cdesc{font-size:12px;color:var(--secondary);line-height:1.5}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:1rem 0}.metric{background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--r);padding:1rem;text-align:center}.metric .mv{font-size:24px;font-weight:500;color:var(--text)}.metric .ml{font-size:11px;color:var(--muted);margin-top:2px}
+.phases{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:1rem 0}.phase{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:1rem}.phase .pn{font-size:10px;font-family:var(--mono);color:var(--muted);margin-bottom:3px}.phase .pt{font-size:14px;font-weight:500;color:var(--text);margin-bottom:3px}.phase .pd{font-size:11px;color:var(--accent);font-family:var(--mono);margin-bottom:8px}.phase ul{list-style:none}.phase ul li{font-size:12px;color:var(--secondary);line-height:1.65;padding-left:12px;position:relative}.phase ul li::before{content:"→";position:absolute;left:0;color:var(--muted);font-size:10px;top:2px}
+.arch{font-family:var(--mono);font-size:12px;line-height:1.9;color:var(--secondary);background:var(--surface2);border:0.5px solid var(--border2);border-radius:var(--r);padding:1.1rem;margin:0.75rem 0}.arch .dir{color:var(--accent)}.arch .cm{color:var(--muted)}
+.lgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:1rem 0}.lcard{border-radius:var(--r);padding:0.8rem;font-size:12px;line-height:1.7}.lok{background:var(--green-bg);border:0.5px solid var(--green-border);color:var(--green)}.lno{background:var(--red-bg);border:0.5px solid var(--red-border);color:var(--red)}.lcard .ll{font-weight:500;font-size:10px;text-transform:uppercase;letter-spacing:0.4px;opacity:0.7;margin-bottom:4px}@media(max-width:560px){.lgrid{grid-template-columns:1fr}}
+.math{font-family:var(--mono);font-size:13px;color:var(--accent);background:var(--accent-bg);padding:0.6rem 0.8rem;border-radius:var(--r);margin:0.5rem 0;border:0.5px solid var(--accent-border)}
+.profile{background:var(--surface2);border:0.5px solid var(--border2);border-radius:12px;padding:1.25rem;font-family:var(--mono);font-size:12px;line-height:2;margin:0.75rem 0}.profile .pname{font-size:16px;color:var(--accent);margin-bottom:4px}.profile .ptop{font-size:11px;color:var(--green);margin-bottom:12px}.profile .prow{display:flex;justify-content:space-between;color:var(--secondary);border-bottom:0.5px solid var(--border);padding:3px 0}.profile .prow:last-child{border-bottom:none}.profile .pkey{color:var(--text)}
+hr{border:none;border-top:0.5px solid var(--border2);margin:2.5rem 0}.footer{font-size:11px;color:var(--muted);text-align:center;font-family:var(--mono);margin-top:3rem}.decision{background:var(--surface2);border:1px solid var(--accent-border);border-radius:12px;padding:1.5rem;margin:1.5rem 0}.decision .dt{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--accent);font-family:var(--mono);margin-bottom:0.5rem}.decision .dv{font-size:24px;font-weight:500;color:var(--text);margin-bottom:0.75rem}.decision p{margin:0;font-size:13px}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div class="toc">
+<a href="#diagnosis">Diagnosis</a><a href="#thesis">Thesis</a><a href="#mechanism">Mechanism</a><a href="#scoring">Scoring</a><a href="#reputation">Reputation</a><a href="#aggregation">Aggregation</a><a href="#questions">Questions</a><a href="#data">Data Model</a><a href="#privacy">Privacy</a><a href="#legal">Legal</a><a href="#regulatory">Regulatory</a><a href="#gst">GST/Entity</a><a href="#scraping">Anti-Scraping</a><a href="#product">Product</a><a href="#api">API</a><a href="#growth">Growth</a><a href="#commercial">Commercial</a><a href="#competitors">Competitors</a><a href="#moat">Moat</a><a href="#tech">Tech</a><a href="#90days">90-Day Plan</a><a href="#roadmap">Roadmap</a><a href="#risks">Risks</a><a href="#decision">Decision</a><a href="#founders">Founders</a>
+</div>
+<div class="wrap">
+<div class="hero"><div class="hero-name">Laplace</div><div class="hero-ver">Product &amp; Startup Specification v3 · August 19, 2026</div><div class="hero-thesis">Laplace measures human uncertainty. It collects probabilistic beliefs before outcomes are known, scores them rigorously, identifies who is good at what, aggregates them into calibrated signals, and sells that signal as probabilistic intelligence to institutions that need to reason about the future.</div><div class="badges"><span class="badge g">PROGA §2(1)(h) social game</span><span class="badge g">DPDP Act compliant path</span><span class="badge b">Blind elicitation core</span><span class="badge b">Forecasting ledger</span><span class="badge b">Brier skill score</span><span class="badge b">Finance-first India</span><span class="badge y">SC ruling pending</span><span class="badge y">SEBI: verify before stock markets</span><span class="badge">MVP: Nov–Dec 2026</span><span class="badge">Real revenue: Q1 2027</span></div></div>
+<h2 id="diagnosis">A. Executive Diagnosis of the Original Document</h2>
+<h3>What the original got right</h3>
+<p>The original document correctly identified the regulatory gap (PROGA §2(1)(h) social game safe harbour), the B2B data thesis over user monetization, the finance-first market scope, the phone OTP auth strategy for India, the SSR-first performance target, and the importance of calibration as an anti-spam mechanism. These survive into v3.</p>
+<h3>What was wrong</h3>
+<p><strong>LMSR is the wrong core mechanism.</strong> LMSR is a market maker designed to create price discovery through virtual trading. For a forecasting intelligence platform, it introduces unnecessary complexity, creates synthetic price signals that do not directly represent beliefs, encourages strategic trading behaviour over sincere belief expression, and makes the underlying dataset scientifically noisier. The entire virtual balance, P&amp;L, and position-trading architecture should be removed.</p>
+<p><strong><code>calibrationScore = 1 - Brier</code> is both terminologically wrong and mathematically misleading.</strong> Brier score decomposes into reliability (calibration), resolution, and uncertainty. Calling <code>1 - Brier</code> a calibration score conflates distinct quantities. A random predictor can produce a superficially attractive number under this transform.</p>
+<p><strong>No blind elicitation.</strong> The original shows crowd probability before a user predicts. This causes anchoring and herding. The fundamental asset of the platform, independent forecasts, is damaged at collection.</p>
+<p><strong>The business model framing was inverted.</strong> The correct framing is a forecasting network whose consumer product generates a longitudinal skill ledger that becomes intelligence infrastructure. The commercial product is calibrated, attributable, historically verified probability intelligence.</p>
+<p><strong>Single-stock markets are excluded from launch.</strong> Individual security price predictions create potential SEBI Research Analyst exposure and require legal review before reintroduction.</p>
+<h3>Decision matrix</h3>
+<table><thead><tr><th>Original element</th><th>Decision</th><th>Reason</th></tr></thead><tbody>
+<tr><td>Play-money prediction market</td><td>Modify</td><td>Keep zero-stake positioning, remove trading metaphor.</td></tr>
+<tr><td>LMSR price discovery</td><td>Remove</td><td>Replace with direct blind probability elicitation.</td></tr>
+<tr><td>Virtual balance / P&amp;L</td><td>Remove</td><td>Reputation, not wealth, is the incentive.</td></tr>
+<tr><td>YES/NO share trading</td><td>Remove</td><td>Probability slider and direct submission.</td></tr>
+<tr><td>Brier-derived calibration score</td><td>Modify</td><td>Use Brier, BSS, and Murphy decomposition.</td></tr>
+<tr><td>Brier-weighted aggregation</td><td>Modify</td><td>Equal weight first, skill weight later, extremization experimentally.</td></tr>
+<tr><td>Phone OTP</td><td>Keep</td><td>India-native identity layer.</td></tr>
+<tr><td>SSR-first + HTMX</td><td>Keep</td><td>Good MVP performance architecture.</td></tr>
+<tr><td>B2B API</td><td>Keep</td><td>Core monetization thesis.</td></tr>
+<tr><td>Single-stock questions</td><td>Remove from seed corpus</td><td>Require written legal review.</td></tr>
+</tbody></table>
+
+<h2 id="thesis">B. Product Thesis</h2>
+<h3>The central reframe</h3>
+<p>The old product was a prediction market. A prediction market creates synthetic price signals through virtual positions. The new product is a <strong>forecasting network</strong>. A forecasting network collects direct probability beliefs from humans, scores them against outcomes, builds a longitudinal skill record, and aggregates calibrated signals into probability intelligence.</p>
+<p>A prediction market's product is a price. A forecasting network's product is a <em>calibrated, attributed, historically verified probability</em> with provenance, skill weighting, uncertainty bounds, and a track record.</p>
+<pre><code>Forecasters (supply)
+    → submit blind probabilities
+    → forecasting ledger (append-only)
+    → resolution engine (outcome recorded)
+    → scoring engine (Brier Skill Score per forecast)
+    → reputation engine (domain skill estimates with uncertainty)
+    → aggregation engine (skill-weighted, extremized)
+    → probability intelligence (public product + B2B API + research)</code></pre>
+<p>The consumer product is the mechanism for building the network. The underlying asset is the longitudinal forecasting record. The commercial product is probabilistic intelligence derived from it.</p>
+
+<h2 id="mechanism">C. Core Mechanism: Blind Direct Probability Elicitation</h2>
+<h3>Why not LMSR</h3><div class="note warn"><p>LMSR was designed to create liquid prediction markets with no counterparty. For a forecasting intelligence platform it introduces strategic behaviour, creates prices rather than direct beliefs, generates a noisier dataset, and requires a complex virtual economy. It is removed entirely from v3.</p></div>
+<p>Direct probability elicitation is simpler and produces a cleaner scientific dataset. Users see a question, but not the current crowd probability, other forecasts, or leaderboard position. They submit 1–99%. Only after submission does the system reveal the aggregate and their position relative to the crowd.</p>
+<h3>Forecast update policy</h3>
+<p>Every update is a new immutable forecast event with timestamp, probability, forecast version, visibility state, crowd state at submission, and resolution state. The first blind forecast and the latest forecast at close are both scored.</p>
+<h3>Experiment framework</h3>
+<p>Future controlled conditions can compare Blind, Visible-consensus, and Visible-leaderboard designs. Calibration and accuracy differences are proprietary research material and should be measured against the blind control.</p>
+
+<h2 id="scoring">D. Scoring Methodology</h2>
+<h3>Correct framework</h3>
+<h4>Primary scoring rule: Brier Score</h4><div class="math">BS(p, o) = (p − o)²</div>
+<p><code>p</code> is stated probability in [0,1], <code>o</code> is outcome 0 or 1. Lower is better.</p>
+<h4>Skill measurement: Brier Skill Score</h4><div class="math">BSS = 1 − (BS_forecaster / BS_reference)</div>
+<p>BSS &gt; 0 means the forecaster beats the reference. BSS = 1 is perfect. BSS &lt; 0 means worse than the reference. This is the main profile skill metric.</p>
+<h4>Reference baselines</h4>
+<table><thead><tr><th>Baseline</th><th>Use</th></tr></thead><tbody><tr><td>Historical base rate</td><td>Preferred first reference where comparable history exists.</td></tr><tr><td>50/50 naive</td><td>Fallback when historical data is unavailable.</td></tr><tr><td>Equal-weight crowd</td><td>Secondary comparison after enough forecasts exist.</td></tr><tr><td>Professional survey</td><td>Macro events where published survey data exists.</td></tr></tbody></table>
+<h4>Murphy decomposition</h4><p>Internally decompose Brier score into reliability, resolution, and uncertainty. Calibration is a specific property of forecast reliability and should not be conflated with total Brier performance.</p>
+<h4>Logarithmic score</h4><div class="math">LS(p, o) = o·log(p) + (1−o)·log(1−p)</div><p>Use internally to flag overconfident forecasts. Do not expose it as the primary user metric.</p>
+<h4>Uncertainty in skill estimates</h4><p>Use Bayesian shrinkage toward a population prior, display confidence intervals, require at least 20 resolved forecasts for domain ranking, and never treat a tiny sample as authoritative.</p>
+
+<h2 id="reputation">E. Reputation System</h2>
+<p>Every forecaster accumulates a public, verifiable, scored history. A strong profile can function as a portable evidence layer for analytical skill.</p>
+<div class="profile"><div class="pname">@macro_analyst</div><div class="ptop">Laplace Forecasting Profile · Top 1.4% Indian Monetary Policy</div><div class="prow"><span class="pkey">Brier Skill Score</span><span>+0.14 ± 0.03</span></div><div class="prow"><span class="pkey">Resolved forecasts</span><span>2,184</span></div><div class="prow"><span class="pkey">Reliability (calibration)</span><span>0.93</span></div><div class="prow"><span class="pkey">Coverage</span><span>82% of available questions</span></div><div class="prow"><span class="pkey">Monetary Policy</span><span>Top 1.4%</span></div><div class="prow"><span class="pkey">Inflation</span><span>Top 3.8%</span></div><div class="prow"><span class="pkey">FX</span><span>Top 8.1%</span></div></div>
+<p>The incentive hypothesis is that status, professional credibility, and a verifiable record can attract serious forecasters without cash prizes. Treat that as an empirical hypothesis for India, not an assumption.</p>
+<p>Internally maintain a posterior distribution over skill. Public profiles show posterior mean and an interval. Under 20 resolved forecasts, show count and “building record” rather than a percentile ranking.</p>
+
+<h2 id="aggregation">F. Aggregation Engine</h2>
+<h3>Stage 1: Equal-weight mean</h3><div class="math">P_agg = (1/N) · Σ p_i</div><p>Launch with the transparent mean. Use it until sufficient skill history exists.</p>
+<h3>Stage 2: BSS-weighted mean</h3><div class="math">w_i = max(0, BSS_i_domain) · f(n_i)</div><div class="math">P_agg = Σ(w_i · p_i) / Σ(w_i)</div><p>Use domain-specific skill with sample-size shrinkage. Do not hard-code arbitrary weighting parameters.</p>
+<h3>Stage 3: Extremization</h3><div class="math">P_extremized = P_agg^α / (P_agg^α + (1−P_agg)^α)</div><p>Estimate α from Laplace's own resolved corpus using out-of-sample validation. Do not copy a literature value blindly.</p>
+<p>Do not add recency decay, correlation adjustment, hierarchical models, or horizon-specific weighting until empirical evidence demonstrates incremental benefit.</p>
+
+<h2 id="questions">G. Question Standard</h2>
+<div class="grid2"><div class="card" style="border-color:var(--red-border)"><div class="clabel" style="color:var(--red)">Bad question</div><div class="cval">“Will the RBI cut rates soon?”</div><div class="cdesc">Undefined timeframe and resolution criteria.</div></div><div class="card" style="border-color:var(--green-border)"><div class="clabel" style="color:var(--green)">Defensible question</div><div class="cval">“Will the RBI MPC reduce the repo rate at the October 4–6, 2026 meeting?”</div><div class="cdesc">Exact dates, binary outcome, explicit resolution source, cancellation rule.</div></div></div>
+<h3>Required fields</h3>
+<pre><code>question_id         UUID
+title               &lt;= 120 chars, plain language
+description         Full context, definitions, edge cases
+jurisdiction        IN / Global / specify
+category            monetary_policy | inflation | gdp | fiscal | conditions | fx | other
+measurement_var     Exact variable being measured
+observation_period  ISO8601 start/end
+prediction_window   forecast-open through cutoff
+cutoff              Exact datetime
+resolution_source   Primary URL or document name
+fallback_source     Secondary source
+resolution_cond     Exact YES condition
+null_rule           Conditions for NULL/cancel
+unit                Measurement unit
+rounding_rule       Numeric tie handling
+ambiguity_rule      Named resolution process</code></pre>
+<h3>Finance-first launch corpus</h3>
+<table><thead><tr><th>Category</th><th>Example</th><th>Resolution</th></tr></thead><tbody>
+<tr><td>Monetary Policy</td><td>Will MPC reduce repo rate at Oct 2026 meeting?</td><td>RBI post-meeting release</td></tr>
+<tr><td>Monetary Policy</td><td>Will MPC vote be 4-2 or more for a cut?</td><td>RBI MPC minutes</td></tr>
+<tr><td>Inflation</td><td>Will India CPI be below 4.5%?</td><td>MoSPI CPI release</td></tr>
+<tr><td>Inflation</td><td>Will India WPI be below 2%?</td><td>WPI release</td></tr>
+<tr><td>Real Economy</td><td>Will Q2 FY27 GDP growth exceed 6.8%?</td><td>MoSPI release</td></tr>
+<tr><td>Real Economy</td><td>Will India IIP exceed 5% YoY?</td><td>MoSPI IIP release</td></tr>
+<tr><td>Fiscal</td><td>Will fiscal deficit stay below 4.9% of GDP in FY27?</td><td>CGA statement</td></tr>
+<tr><td>Financial Conditions</td><td>Will 10-year G-sec yield close below 6.6%?</td><td>RBI benchmark/EOD</td></tr>
+<tr><td>FX</td><td>Will USD/INR close above 84.5?</td><td>RBI reference rate</td></tr>
+</tbody></table>
+<div class="note danger"><p><strong>SEBI boundary:</strong> no single-stock questions at launch. Any specific security prediction or investment recommendation requires written legal review.</p></div>
+
+<h2 id="data">H. Data Model</h2>
+<p>No forecast is overwritten. Every submission creates an immutable event so the complete belief history can be reconstructed.</p>
+<pre><code>-- FORECASTER
+forecaster_id       UUID
+user_id             UUID
+display_name        string
+joined_at           timestamp
+domain_scores       JSON
+total_forecasts     int
+resolved_forecasts  int
+visibility          public | private
+
+-- QUESTION
+question_id         UUID
+title               string
+description         text
+category            enum
+measurement_var     string
+observation_period  [timestamp, timestamp]
+prediction_window   [timestamp, timestamp]
+cutoff              timestamp
+resolution_source   string
+fallback_source     string
+resolution_cond     text
+null_rule           text
+status              open | closed | resolved | cancelled
+resolution          boolean | null
+resolved_at         timestamp
+resolved_by         admin_id
+resolution_note     text
+
+-- FORECAST EVENT (immutable)
+forecast_id         UUID
+forecaster_id       UUID
+question_id         UUID
+timestamp           timestamp
+probability         float [0.01, 0.99]
+forecast_version    int
+visibility_state    blind | post_reveal
+crowd_prob_at_sub   float | null
+crowd_n_at_sub      int
+source              web | api | mobile
+brier_score         float | null
+log_score           float | null
+brier_skill_score   float | null
+baseline_prob       float | null
+
+-- AGGREGATE
+question_id         UUID
+computed_at         timestamp
+equal_weight_prob   float
+bss_weight_prob     float
+extremized_prob     float
+n_forecasters       int
+dispersion_std      float
+top_cohort_prob     float
+top_cohort_n        int
+crowd_prob_history  JSON</code></pre>
+<h3>Identity separation</h3><p>Phone, email, device, and IP information live in a separate access-controlled identity store. Analytical data uses forecaster_id only.</p>
+
+<h2 id="privacy">I. Privacy Architecture</h2>
+<p>Laplace should treat itself as a Data Fiduciary and design notice, consent, rights handling, security safeguards, processor contracts, children's-data controls, and breach response into the system rather than retrofit them.</p>
+<table><thead><tr><th>Obligation</th><th>Implementation</th></tr></thead><tbody><tr><td>Notice and consent</td><td>Clear, itemised purposes and withdrawal mechanism.</td></tr><tr><td>Breach notification</td><td>Documented incident response and statutory notification process.</td></tr><tr><td>Erasure</td><td>Identity store must support deletion workflows.</td></tr><tr><td>Children</td><td>Age gate and required parental controls where applicable.</td></tr><tr><td>Processors</td><td>Review Firebase and hosting DPAs.</td></tr><tr><td>Security</td><td>Access controls, encryption, logging, least privilege.</td></tr></tbody></table>
+<div class="note"><p><strong>Cross-border transfer:</strong> Firebase/Google Cloud architecture requires legal review of data transfer and localisation requirements. Prefer an India-region deployment where practical.</p></div>
+
+<h2 id="legal">J. Data Rights Model</h2>
+<table><thead><tr><th>Data type</th><th>Control</th><th>User rights</th><th>Commercial use</th></tr></thead><tbody><tr><td>Identity data</td><td>DPDP-governed</td><td>Access, correction, erasure as applicable</td><td>No</td></tr><tr><td>Raw forecast records</td><td>Contractual rights subject to law</td><td>View own history; identity deletion workflow</td><td>Aggregation, licensing, research</td></tr><tr><td>Brier/BSS</td><td>Derived metric</td><td>Visible on profile</td><td>Yes</td></tr><tr><td>Domain rankings</td><td>Derived</td><td>Private mode</td><td>Yes</td></tr><tr><td>Aggregate crowd probabilities</td><td>Company-derived product</td><td>N/A</td><td>Yes</td></tr><tr><td>Historical dataset</td><td>Proprietary compiled asset</td><td>Subject to source rights and law</td><td>Yes, under licence</td></tr></tbody></table>
+<div class="note warn"><p>Laplace cannot contract away statutory data-principal rights. Terms should distinguish personal data, pseudonymous analytical records, aggregates, and derived metrics precisely.</p></div>
+
+<h2 id="legal-portal">K. Legal Portal &amp; Government Disclosure Process</h2>
+<p>The <code>/legal</code> page should expose a government/regulatory request workflow, status tracker, transparency report, disclosure policy, automated access policy, copyright/IP contact, security contact, and abuse contact.</p>
+<pre><code>Received
+→ Authentication
+→ Legal Review
+→ Scope Review
+→ Decision: Approve / Reject / Clarify
+→ Fulfillment
+→ Audit entry
+→ Transparency publication when legally permitted</code></pre>
+<table><thead><tr><th>Transparency field</th><th>Description</th></tr></thead><tbody><tr><td>Total requests</td><td>Count per reporting period</td></tr><tr><td>Validated requests</td><td>Passed authentication and review</td></tr><tr><td>Rejected requests</td><td>Invalid, overbroad, or unverifiable</td></tr><tr><td>Fulfilled requests</td><td>Data disclosed</td></tr><tr><td>Confidential requests</td><td>Count only where publication is prohibited</td></tr></tbody></table>
+
+<h2 id="regulatory">L. Regulatory Considerations (India, August 2026)</h2>
+<div class="note warn"><p>This specification is not legal advice. Obtain current counsel before launch and verify each claim against the then-current statute, rules, circulars, and case law.</p></div>
+<table><thead><tr><th>Question</th><th>Classification</th><th>Current design implication</th></tr></thead><tbody><tr><td>Zero-stake forecasting classification</td><td class="badge g">Likely permissible path</td><td>No user stake, no monetary prize, no enrichment. Validate with counsel.</td></tr><tr><td>B2B aggregated economic probabilities</td><td class="badge y">Fact-dependent</td><td>Frame as economic probability data, not investment advice.</td></tr><tr><td>Single-stock forecasts</td><td class="badge r">Lawyer required</td><td>Exclude from launch.</td></tr><tr><td>OGAI registration/classification</td><td class="badge y">Fact-dependent</td><td>Consider a formal classification request.</td></tr></tbody></table>
+<h3>SEBI boundary</h3><p>Keep the launch corpus to macroeconomic variables, RBI decisions, inflation, GDP, fiscal variables, broad FX, and comparable non-security-specific events. Do not frame the product as buy/sell/hold advice.</p>
+
+<h2 id="gst">M. GST &amp; Entity Structure</h2>
+<table><thead><tr><th>Trigger</th><th>Action</th></tr></thead><tbody><tr><td>Start project</td><td>Private Limited Company structure, with objects covering forecasting and analytics.</td></tr><tr><td>First B2B contract</td><td>Contract through the company and assign pre-incorporation IP.</td></tr><tr><td>Tax registration threshold</td><td>Determine GST registration based on turnover, supply type, and place of supply with a CA.</td></tr><tr><td>Foreign customer</td><td>Review export-of-services, GST, LUT, and invoicing requirements before first invoice.</td></tr></tbody></table>
+<p>Potential SAC classifications and the exact tax treatment should be confirmed by a CA before invoicing.</p>
+
+<h2 id="scraping">N. Anti-Scraping &amp; AI Crawler Policy</h2>
+<p>It is impossible to guarantee that a sophisticated automated browser is a machine. The objective is to make large-scale extraction difficult, detectable, contractually prohibited, and commercially unattractive.</p>
+<table><thead><tr><th>Control</th><th>Purpose</th><th>Limitation</th></tr></thead><tbody><tr><td>robots.txt</td><td>Instruct compliant crawlers and block sensitive paths.</td><td>Advisory only.</td></tr><tr><td>Cloudflare WAF/Bot Management</td><td>Bot mitigation and rate limiting.</td><td>Known-fingerprint coverage is imperfect.</td></tr><tr><td>Authentication gating</td><td>Keep historical and individual data behind login.</td><td>Account farming remains possible.</td></tr><tr><td>Rate limiting</td><td>Reduce automated request volume.</td><td>Distributed scraping can evade per-IP controls.</td></tr><tr><td>Data minimization</td><td>Do not ship complete datasets into DOM or bundles.</td><td>Authenticated clients still receive data they can access.</td></tr><tr><td>Behavioural detection</td><td>Challenge anomalous access patterns.</td><td>Sophisticated browsers can simulate normal interaction.</td></tr></tbody></table>
+<h3>robots.txt template</h3>
+<pre><code>User-agent: Googlebot
+Allow: /markets/
+Disallow: /api/
+Disallow: /forecasts/
+Disallow: /history/
+Disallow: /profiles/
+
+User-agent: GPTBot
+Disallow: /
+User-agent: ClaudeBot
+Disallow: /
+User-agent: anthropic-ai
+Disallow: /
+User-agent: CCBot
+Disallow: /
+User-agent: Meta-ExternalAgent
+Disallow: /
+User-agent: FacebookBot
+Disallow: /
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: OAI-SearchBot
+Allow: /markets/
+
+User-agent: *
+Disallow: /api/
+Disallow: /forecasts/
+Disallow: /history/</code></pre>
+
+<h2 id="product">O. Consumer Product (MVP)</h2>
+<h3>The simplest thing that proves the network</h3><p>The MVP should do one thing excellently: take a serious person's probability estimate on a well-defined financial question, score it against the outcome, and build their verifiable record.</p>
+<pre><code>1. Sign up (phone OTP)
+2. See questions open for forecasting
+3. Open question and read full specification
+4. Submit blind probability from 1%–99%
+5. Reveal crowd aggregate after submission
+6. Inspect profile and calibration history
+7. Receive resolution and score notification</code></pre>
+<h3>Not in the MVP</h3>
+<table><thead><tr><th>Feature</th><th>Status</th><th>Reason</th></tr></thead><tbody><tr><td>Virtual money / P&amp;L</td><td>Removed</td><td>Wrong mechanism.</td></tr><tr><td>LMSR</td><td>Removed</td><td>Wrong mechanism.</td></tr><tr><td>User-created markets</td><td>Deferred</td><td>Need quality controls first.</td></tr><tr><td>Comments/forum</td><td>Deferred</td><td>Moderation burden.</td></tr><tr><td>Mobile app</td><td>Deferred</td><td>PWA is sufficient.</td></tr><tr><td>Real-money trading</td><td>Deferred</td><td>Legal status must be verified.</td></tr><tr><td>Single-stock questions</td><td>Deferred</td><td>SEBI review.</td></tr><tr><td>Complex terminal UI</td><td>Deferred</td><td>Audience first.</td></tr></tbody></table>
+
+<h3>Professional product</h3>
+<pre><code>GET /api/v1/questions/{id}/intelligence
+
+{
+  "question": "Will MPC reduce repo rate at Oct 2026 meeting?",
+  "status": "open",
+  "probability": {
+    "equal_weight": 0.61,
+    "skill_weighted": 0.67,
+    "extremized": 0.72,
+    "n_forecasters": 84,
+    "top_decile_prob": 0.74,
+    "top_decile_n": 9
+  },
+  "dispersion": {"std_dev": 0.14,"p25": 0.55,"p75": 0.78,"interpretation": "moderate_disagreement"},
+  "baselines": {"historical_base_rate": 0.38,"bloomberg_consensus": null,"rbi_survey_implied": null}
+}</code></pre>
+
+<h2 id="api">Q. API &amp; Media Embeds</h2>
+<table><thead><tr><th>Tier</th><th>Price</th><th>Target</th></tr></thead><tbody><tr><td>Free</td><td>₹0</td><td>Journalists, researchers, public</td></tr><tr><td>Starter</td><td>₹2,000/mo</td><td>Analysts, newsletters</td></tr><tr><td>Pro</td><td>₹8,000/mo</td><td>Financial media, research desks</td></tr><tr><td>Enterprise</td><td>₹30,000+/mo</td><td>Institutions</td></tr><tr><td>Research</td><td>Negotiated</td><td>Academic and policy users</td></tr></tbody></table>
+<h3>Embed widget</h3>
+<pre><code>&lt;script src="https://laplace.market/embed.js"&gt;&lt;/script&gt;
+&lt;laplace-forecast
+  question-id="Q-001-MPC-OCT26"
+  show-history="true"
+  theme="light"
+&gt;&lt;/laplace-forecast&gt;</code></pre>
+
+<h2 id="growth">R. Growth Strategy</h2>
+<p>Do not launch publicly before a serious supply of forecasters exists. Seed the network directly and validate retention.</p>
+<table><thead><tr><th>Cohort</th><th>Why</th><th>Recruitment</th><th>Retention</th></tr></thead><tbody><tr><td>Economics/finance students</td><td>CV signal and analytical practice</td><td>Departments and clubs</td><td>Rankings and shareable profiles</td></tr><tr><td>Research associates</td><td>Test views and build credibility</td><td>Professional outreach</td><td>Track record</td></tr><tr><td>Finance writers</td><td>Public credibility</td><td>Direct outreach</td><td>Citations and distribution</td></tr><tr><td>Treasury/risk professionals</td><td>Private forecasting</td><td>Professional network</td><td>Private mode and domain ranking</td></tr><tr><td>Economists</td><td>Research interest</td><td>Academic outreach</td><td>Research access</td></tr></tbody></table>
+<h3>Growth flywheel</h3><pre><code>Qualified forecasters
+    → high-quality forecasts
+    → accurate aggregate probabilities
+    → interesting public data
+    → media pickup
+    → more forecasters
+    → broader skill distribution
+    → better data
+    → B2B interest
+    → more distribution</code></pre>
+<div class="note danger"><p>Do not market Laplace using gambling or money-game language. Use “forecasting record,” “probability,” “calibrated prediction,” and “forecasting network.”</p></div>
+
+<h2 id="commercial">S. Commercial Paths</h2>
+<table><thead><tr><th>Path</th><th>Time to revenue</th><th>Defensibility</th></tr></thead><tbody><tr><td>Media embed</td><td>Month 5</td><td>Low</td></tr><tr><td>B2B API</td><td>Month 5</td><td>Medium</td></tr><tr><td>Pro subscriptions</td><td>Month 4</td><td>Low</td></tr><tr><td>Research dataset licensing</td><td>Month 8</td><td>High</td></tr><tr><td>Forecaster reputation/talent discovery</td><td>Month 12+</td><td>High at scale</td></tr><tr><td>AI model evaluation benchmark</td><td>Month 12+</td><td>Potentially high</td></tr></tbody></table>
+<div class="note warn"><p>No revenue path is validated. Customer discovery must precede enterprise buildout.</p></div>
+
+<h2 id="competitors">T. Competitive Analysis</h2>
+<table><thead><tr><th>Competitor</th><th>Model</th><th>Laplace differentiation</th></tr></thead><tbody><tr><td>Metaculus</td><td>Forecasting and reputation</td><td>India-specific macro corpus and local distribution.</td></tr><tr><td>Manifold Markets</td><td>Play-money market</td><td>Forecasting ledger and scoring focus.</td></tr><tr><td>Good Judgment Open</td><td>Forecasting reputation</td><td>India financial and macro focus.</td></tr><tr><td>Polymarket / Kalshi</td><td>Real-money markets</td><td>Legally distinct zero-stake model.</td></tr><tr><td>Bloomberg/Reuters polls</td><td>Professional surveys</td><td>Real-time crowd source and lower-cost probability feed.</td></tr></tbody></table>
+
+<h2 id="moat">U. Moat Analysis</h2>
+<p>The durable candidates are a longitudinal resolved dataset, a forecaster reputation graph, validated aggregation methodology, and media distribution. None is a moat at day zero. Each must be earned by operating long enough to accumulate verified history.</p>
+<table><thead><tr><th>Candidate</th><th>Potential</th><th>Proof requirement</th></tr></thead><tbody><tr><td>Resolved dataset</td><td>High</td><td>100+ quality resolved questions.</td></tr><tr><td>Reputation graph</td><td>High</td><td>Forecasters care about portable credibility.</td></tr><tr><td>Aggregation methodology</td><td>Medium/High</td><td>Out-of-sample superiority against baselines.</td></tr><tr><td>Media distribution</td><td>Medium</td><td>Repeated third-party citations.</td></tr></tbody></table>
+
+<h2 id="tech">V. Technical Architecture</h2>
+<div class="grid2"><div class="card"><div class="clabel">Frontend</div><div class="cval">SvelteKit + HTMX</div><div class="cdesc">SSR-first, fast initial paint, lightweight post-submit updates.</div></div><div class="card"><div class="clabel">Backend</div><div class="cval">Node.js / TypeScript or Go</div><div class="cdesc">Submission, resolution, aggregation, API.</div></div><div class="card"><div class="clabel">Database</div><div class="cval">Firebase Firestore</div><div class="cdesc">Append-only forecast events and metadata.</div></div><div class="card"><div class="clabel">Auth</div><div class="cval">Firebase Auth</div><div class="cdesc">Phone OTP for India-native identity.</div></div><div class="card"><div class="clabel">Hosting</div><div class="cval">Firebase + Cloudflare</div><div class="cdesc">Deployment, CDN, WAF, DDoS and bot controls.</div></div><div class="card"><div class="clabel">Analytics</div><div class="cval">PostHog</div><div class="cdesc">Retention and funnel measurement.</div></div></div>
+<h3>Firestore schema</h3><pre><code>/questions/{questionId}
+/forecasts/{forecastId}
+/forecasters/{forecasterId}
+/resolutions/{questionId}
+/aggregates/{questionId}
+/legal_requests/{requestId}
+/disclosure_ledger/{entryId}</code></pre>
+<p>Aggregates should be computed asynchronously rather than on every write. A scheduled job refreshes active questions frequently and writes computed aggregate state to a dedicated collection.</p>
+
+<h2 id="90days">W. 90-Day Experiment</h2>
+<h3>The core business question</h3><p>Will serious people voluntarily submit calibrated probabilities on Indian financial events, return to update them, and create a dataset with predictive value above simple baselines, sufficient to create professional interest?</p>
+<table><thead><tr><th>Metric</th><th>Validate</th><th>Abandon</th></tr></thead><tbody><tr><td>Qualified active forecasters</td><td>≥30</td><td>&lt;15</td></tr><tr><td>60-day retention</td><td>≥50%</td><td>&lt;25%</td></tr><tr><td>Forecasts/qualified forecaster</td><td>≥8</td><td>&lt;3</td></tr><tr><td>Resolved questions</td><td>≥8</td><td>&lt;3</td></tr><tr><td>Crowd BSS</td><td>&gt;0 on ≥5 resolved questions</td><td>≤0 on all</td></tr><tr><td>Professional interest</td><td>≥3 genuine enquiries</td><td>0</td></tr></tbody></table>
+<div class="note warn"><p>A small number of resolved questions is a business-validation signal, not proof of general forecasting superiority. Report effect sizes and uncertainty honestly.</p></div>
+<h3>Experiment design</h3><pre><code>Target forecasters: 30–50 recruited directly
+Market count: 30 finance-only questions
+Elicitation: blind
+Resolution: within 48h of outcome availability
+Scoring: Brier Skill Score
+Baselines: 50/50, historical base rate, professional survey where available
+Data: complete immutable forecast event log
+Retention: Day 30 / 60 / 90 cohorts</code></pre>
+
+<h2 id="roadmap">Y. Roadmap</h2>
+<table><thead><tr><th>Phase</th><th>Period</th><th>North star</th><th>Milestones</th></tr></thead><tbody>
+<tr><td>0 — Foundation</td><td>Nov 2026</td><td>30 questions, 30 forecasters</td><td>Incorporate, schema, blind submission.</td></tr>
+<tr><td>1 — MVP</td><td>Dec 2026</td><td>First 5 questions resolved</td><td>BSS, profiles, leaderboard, alerts.</td></tr>
+<tr><td>2 — Heavy hitting</td><td>Jan–Feb 2027</td><td>50+ active forecasters</td><td>Skill weighting, API, discovery.</td></tr>
+<tr><td>3 — Revenue</td><td>Mar–Apr 2027</td><td>First paying B2B customer</td><td>Pro API, widget, media outreach.</td></tr>
+<tr><td>4 — Scale</td><td>May–Aug 2027</td><td>100k forecasts</td><td>Research dataset, PWA, AI evaluation.</td></tr>
+<tr><td>5 — International</td><td>Q4 2027+</td><td>Non-India corpus</td><td>Fed, BoE, ECB, global B2B.</td></tr>
+<tr><td>6 — Real money if legal</td><td>Post-ruling</td><td>Licensed market</td><td>Legal, payment rails, regulated trading layer.</td></tr>
+</tbody></table>
+
+<h2 id="risks">Z. Risks</h2>
+<table><thead><tr><th>Risk</th><th>Severity</th><th>Mitigation</th></tr></thead><tbody>
+<tr><td>Ghost-town</td><td>Critical</td><td>Recruit directly before public launch.</td></tr><tr><td>Low forecaster retention</td><td>High</td><td>Fast resolution, feedback, reputation.</td></tr><tr><td>Regulatory reclassification</td><td>Medium</td><td>Maintain zero-stake design and seek legal classification.</td></tr><tr><td>Single-stock creep</td><td>High</td><td>Require written legal opinion.</td></tr><tr><td>Cross-border privacy issue</td><td>Medium</td><td>India-region deployment and counsel review.</td></tr><tr><td>No B2B willingness to pay</td><td>High</td><td>Customer discovery before enterprise buildout.</td></tr><tr><td>Crowd no better than baseline</td><td>High</td><td>Use BSS as a hard validation gate.</td></tr><tr><td>Dataset scraping</td><td>Medium</td><td>Cloudflare, auth, minimization, terms.</td></tr></tbody></table>
+
+<h2 id="decision">Final Decision Framework</h2>
+<div class="decision"><div class="dt">Recommendation</div><div class="dv">VALIDATE FIRST</div><p>Do not abandon, but do not build at full speed. Build the minimum necessary to run the 90-day experiment: blind elicitation, proper scoring, 30 questions, recruited forecasters, rigorous resolution, and a measurable scorecard. The experiment should determine whether there is a real forecasting network and a commercially credible data asset.</p><p style="margin-top:0.75rem">Build the ledger. Recruit the forecasters. Resolve the questions. Measure the skill. If the experiment succeeds, build. If it fails to attract qualified forecasters or produces no useful signal, redesign or stop.</p></div>
+
+<h2 id="founders">Founder Questions</h2>
+<h3>Questions that still need answers</h3>
+<ul style="list-style:none;padding-left:0;margin:0.5rem 0"><li style="font-size:13px;color:var(--secondary);padding:5px 0;border-bottom:0.5px solid var(--border)">1. Do you have existing relationships with economists, finance students, or research associates who can become the first 10 forecasters?</li><li style="font-size:13px;color:var(--secondary);padding:5px 0;border-bottom:0.5px solid var(--border)">2. Who is your co-founder Ronak, what is his background, and what does he own?</li><li style="font-size:13px;color:var(--secondary);padding:5px 0;border-bottom:0.5px solid var(--border)">3. How much time per week can each founder commit to question writing and resolution?</li><li style="font-size:13px;color:var(--secondary);padding:5px 0;border-bottom:0.5px solid var(--border)">4. Do you have a CA and startup counsel contact?</li><li style="font-size:13px;color:var(--secondary);padding:5px 0;border-bottom:0.5px solid var(--border)">5. Has any financial journalist or publisher agreed to test the widget?</li><li style="font-size:13px;color:var(--secondary);padding:5px 0">6. Are you willing to operate for 12 months before depending on meaningful revenue?</li></ul>
+<h3>Uncomfortable questions</h3>
+<ul style="list-style:none;padding-left:0;margin:0.5rem 0"><li style="font-size:13px;color:var(--secondary);padding:5px 0;border-bottom:0.5px solid var(--border)"><strong>What if Indian forecasters are not calibrated?</strong> If the cohort is no better than random or baseline, the commercial thesis fails.</li><li style="font-size:13px;color:var(--secondary);padding:5px 0;border-bottom:0.5px solid var(--border)"><strong>What if B2B customers already have sufficient consensus data?</strong> The product must outperform on speed, coverage, cost, or accuracy.</li><li style="font-size:13px;color:var(--secondary);padding:5px 0;border-bottom:0.5px solid var(--border)"><strong>What if reputation is not enough to retain forecasters?</strong> Decide in advance what incentives can be introduced without creating regulatory exposure.</li><li style="font-size:13px;color:var(--secondary);padding:5px 0;border-bottom:0.5px solid var(--border)"><strong>Who resolves ambiguous outcomes?</strong> Resolution rules are part of the core product and must be documented.</li><li style="font-size:13px;color:var(--secondary);padding:5px 0"><strong>What happens if both real-money optionality and B2B revenue fail?</strong> The answer must be a deliberate capital-allocation decision, not accidental drift.</li></ul>
+<h3>Final answer</h3><p>If operating with limited capital, build the smallest version that tests the forecasting-network thesis. In the next 30 days, incorporate, define high-quality questions, build the blind submission flow, recruit the first forecasters personally, resolve the first question quickly, and score it.</p><p><strong>Abandonment trigger:</strong> after 90 days, with 30+ participating forecasters and 8+ resolved questions, the equal-weight crowd has Brier Skill Score ≤ 0 on every resolved question and there is no evidence of professional demand. At that point the underlying value proposition has not been demonstrated.</p>
+<hr><div class="footer">laplace · product specification v3 · august 19, 2026 · not legal advice · validate before building</div>
+</div>
+<script>
+new p5(function(p){
+  let pts=[], W, H;
+  p.setup=function(){
+    let c=p.createCanvas(window.innerWidth,window.innerHeight); c.parent('bg');
+    p.colorMode(p.HSB,360,100,100,100); W=p.width; H=p.height;
+    for(let i=0;i<80;i++) pts.push({x:p.random(W),y:p.random(H),vx:p.random(-0.3,0.3),vy:p.random(-0.3,0.3),r:p.random(1,2.5),h:p.random(200,240)});
+  };
+  p.draw=function(){
+    p.clear(); let t=p.frameCount*0.006;
+    for(let i=0;i<pts.length;i++){
+      let q=pts[i]; q.x+=q.vx+(p.noise(q.x*.003,q.y*.003,t)-.5)*.6; q.y+=q.vy+(p.noise(q.x*.003+100,q.y*.003,t)-.5)*.6;
+      if(q.x<0)q.x=W;if(q.x>W)q.x=0;if(q.y<0)q.y=H;if(q.y>H)q.y=0;
+      p.noStroke();p.fill(q.h,40,70,80);p.ellipse(q.x,q.y,q.r*2);
+    }
+    for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){
+      let d=p.dist(pts[i].x,pts[i].y,pts[j].x,pts[j].y);
+      if(d<100){p.stroke(220,25,60,p.map(d,0,100,18,0));p.strokeWeight(.4);p.line(pts[i].x,pts[i].y,pts[j].x,pts[j].y);}
+    }
+  };
+  p.windowResized=function(){p.resizeCanvas(window.innerWidth,window.innerHeight);W=p.width;H=p.height;};
+},document.body);
+</script>
+</body>
+</html>
